@@ -1,12 +1,12 @@
 import { initializeApp } from "firebase/app";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCEdUKQ8bRW56CAB5UpbG-lj32XG1dkqAg",
-  authDomain: "alertatec-da6ce.firebaseapp.com",
-  projectId: "alertatec-da6ce",
-  storageBucket: "alertatec-da6ce.firebasestorage.app",
-  messagingSenderId: "774565431078",
-  appId: "1:774565431078:web:95b822d829ef2dbac963e7",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);
