@@ -1,3 +1,10 @@
+.input-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
 .input {
   width: 100%;
   padding: 0.75rem 1rem;
@@ -6,6 +13,15 @@
   font-size: 1rem;
   transition: border-color 0.2s ease;
   font-family: inherit;
+  background: white;
+}
+
+.input.with-icon {
+  padding-left: 3rem;
+}
+
+.input.with-toggle {
+  padding-right: 3rem;
 }
 
 .input:focus {
@@ -20,4 +36,67 @@
 
 .input::placeholder {
   color: #999;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  z-index: 1;
+  color: #666;
+  font-size: 1.2rem;
+  pointer-events: none;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.input-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.input-container:focus-within .input-icon {
+  color: #667eea;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  color: #666;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.password-toggle svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.password-toggle:hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.1);
+  transform: scale(1.05);
+}
+
+.password-toggle:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.password-toggle:active {
+  transform: scale(0.95);
 }

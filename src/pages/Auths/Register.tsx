@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { HiUser, HiMail, HiPhone, HiLockClosed } from "react-icons/hi";
 import Header from "../../components/Header/Header";
 import Button from "../../components/Button/Button";
 import Input from "../../components/Input/Input";
 import Card from "../../components/Card/Card";
 import { useNavigate } from "../../hooks/useNavigate";
+import { useAuthContext } from "../../contexts/AuthContext";
 import "./Auth.css";
 
 export default function RegisterPage() {
@@ -14,27 +16,73 @@ export default function RegisterPage() {
     confirmPassword: "",
     phone: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { register, error, clearError } = useAuthContext();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+
+    if (error) {
+      clearError();
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isSubmitting) return;
+
+    // Validar se as senhas coincidem
+    if (formData.password !== formData.confirmPassword) {
+      alert("As senhas não coincidem!");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+      });
+
+      // Aguardar um pouco para garantir que o estado seja atualizado
+      console.log("🚀 Registration completed, navigating to dashboard...");
+      setTimeout(() => {
+        navigate("dashboard");
+        setIsSubmitting(false);
+      }, 1000);
+    } catch (error) {
+      // Erro será mostrado automaticamente via contexto
+      console.error("Erro no registro:", error);
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="auth-page">
       <Header showAuthButtons={false} />
 
+      <button
+        className="back-button"
+        onClick={() => navigate("landing")}
+        title="Voltar para página inicial"
+      />
+
       <div className="auth-container">
         <Card className="auth-card">
           <div className="auth-header">
             <h1>Criar Conta</h1>
-            <p>Cadastre-se como vendedor</p>
+            <p>Cadastre-se na plataforma</p>
+            {error && <div className="auth-error">{error}</div>}
           </div>
 
-          <form className="auth-form">
+          <form className="auth-form" onSubmit={handleSubmit}>
             <Input
               type="text"
               name="name"
@@ -42,6 +90,7 @@ export default function RegisterPage() {
               value={formData.name}
               onChange={handleChange}
               required
+              icon={<HiUser />}
             />
 
             <Input
@@ -51,6 +100,7 @@ export default function RegisterPage() {
               value={formData.email}
               onChange={handleChange}
               required
+              icon={<HiMail />}
             />
 
             <Input
@@ -60,28 +110,37 @@ export default function RegisterPage() {
               value={formData.phone}
               onChange={handleChange}
               required
+              icon={<HiPhone />}
             />
 
             <Input
-              type="password"
               name="password"
               placeholder="Sua senha"
               value={formData.password}
               onChange={handleChange}
               required
+              icon={<HiLockClosed />}
+              showPasswordToggle={true}
             />
 
             <Input
-              type="password"
               name="confirmPassword"
               placeholder="Confirme sua senha"
               value={formData.confirmPassword}
               onChange={handleChange}
               required
+              icon={<HiLockClosed />}
+              showPasswordToggle={true}
             />
 
-            <Button type="submit" variant="primary" size="large" fullWidth>
-              Criar Conta
+            <Button
+              type="submit"
+              variant="primary"
+              size="large"
+              fullWidth
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Criando conta..." : "Criar Conta"}
             </Button>
           </form>
 
