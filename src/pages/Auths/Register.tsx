@@ -51,14 +51,12 @@ export default function RegisterPage() {
         phone: formData.phone,
       });
 
-      // Aguardar um pouco para garantir que o estado seja atualizado
       console.log("🚀 Registration completed, navigating to dashboard...");
       setTimeout(() => {
         navigate("dashboard");
         setIsSubmitting(false);
       }, 1000);
     } catch (error) {
-      // Erro será mostrado automaticamente via contexto
       console.error("Erro no registro:", error);
       setIsSubmitting(false);
     }
