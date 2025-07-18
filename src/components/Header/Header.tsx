@@ -22,7 +22,7 @@ export default function Header({
       <div className="header-container">
         <div className="logo" onClick={() => navigate("landing")}>
           <span className="logo-icon">🚀</span>
-          <span className="logo-text">AlertaTec</span>
+          <span className="logo-text-header">AlertaTec</span>
         </div>
 
         <div className="nav">

@@ -1,5 +1,5 @@
 export interface Contract {
-  id: number;
+  id?: string;
   clientName: string;
   clientEmail: string;
   clientPhone: string;

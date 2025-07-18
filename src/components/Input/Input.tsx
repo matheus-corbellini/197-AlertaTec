@@ -16,6 +16,7 @@ interface InputProps {
   className?: string;
   icon?: React.ReactNode;
   showPasswordToggle?: boolean;
+  label?: string;
 }
 
 export default function Input({
@@ -29,6 +30,7 @@ export default function Input({
   className = "",
   icon,
   showPasswordToggle = false,
+  label,
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -44,31 +46,35 @@ export default function Input({
 
   return (
     <div className={`input-container ${className}`}>
-      {icon && <span className="input-icon">{icon}</span>}
+      {label && <label className="input-label">{label}</label>}
 
-      <input
-        type={inputType}
-        name={name}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange}
-        required={required}
-        disabled={disabled}
-        className={`input ${icon ? "with-icon" : ""} ${
-          showPasswordToggle ? "with-toggle" : ""
-        }`}
-      />
+      <div className="input-wrapper">
+        {icon && <span className="input-icon">{icon}</span>}
 
-      {showPasswordToggle && (
-        <button
-          type="button"
-          className="password-toggle"
-          onClick={togglePasswordVisibility}
-          aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
-        >
-          {showPassword ? <HiEye /> : <HiEyeOff />}
-        </button>
-      )}
+        <input
+          type={inputType}
+          name={name}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          required={required}
+          disabled={disabled}
+          className={`input ${icon ? "with-icon" : ""} ${
+            showPasswordToggle ? "with-toggle" : ""
+          }`}
+        />
+
+        {showPasswordToggle && (
+          <button
+            type="button"
+            className="password-toggle"
+            onClick={togglePasswordVisibility}
+            aria-label={showPassword ? "Esconder senha" : "Mostrar senha"}
+          >
+            {showPassword ? <HiEye /> : <HiEyeOff />}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

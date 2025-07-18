@@ -1,0 +1,53 @@
+.client-form {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(44, 62, 80, 0.08);
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-label {
+  font-weight: 600;
+  font-size: 1.08rem;
+  margin-bottom: 0.25rem;
+  color: #222;
+}
+
+.input {
+  border-radius: 8px;
+  border: 1.5px solid #e0e0e0;
+  padding: 0.9rem 1rem;
+  font-size: 1.08rem;
+  background: #fafbfc;
+  transition: border 0.2s;
+}
+
+.input:focus {
+  border-color: #5c6bc0;
+  outline: none;
+  background: #fff;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 1.2rem;
+}
+
+.input.with-icon {
+  padding-left: 2.5rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  border-top: 1px solid #eee;
+  padding-top: 1.5rem;
+}
