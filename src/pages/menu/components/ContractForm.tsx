@@ -14,6 +14,7 @@ import Input from "../../../components/Input/Input";
 import Card from "../../../components/Card/Card";
 import type { ContractFormProps } from "../../../types/Contract";
 import "./ContractForm.css";
+import { useToast } from "../../../contexts/useToast";
 
 export default function ContractForm({ onSubmit }: ContractFormProps) {
   const [formData, setFormData] = useState({
@@ -26,6 +27,8 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
     paymentTerms: "a vista",
     duration: "",
   });
+
+  const { showToast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +43,7 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
       paymentTerms: "a vista",
       duration: "",
     });
-    alert("Contrato criado com sucesso!");
+    showToast("Contrato criado com sucesso!", "success");
   };
 
   const handleChange = (

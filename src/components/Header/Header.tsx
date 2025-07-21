@@ -4,6 +4,8 @@ import Button from "../Button/Button";
 import "./Header.css";
 import { useNavigate } from "../../hooks/useNavigate";
 import type { User } from "../../types/User";
+import ConfirmModal from "../ConfirmModal/ConfirmModal";
+import { useState } from "react";
 
 interface HeaderProps {
   showAuthButtons?: boolean;
@@ -17,6 +19,7 @@ export default function Header({
   onLogout,
 }: HeaderProps) {
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   return (
     <header className="header">
       <div className="header-container">
@@ -29,7 +32,10 @@ export default function Header({
           {user ? (
             <div className="user-menu">
               <span className="user-name"> Ola, {user.name}</span>
-              <Button variant="secondary" onClick={onLogout}>
+              <Button
+                variant="secondary"
+                onClick={() => setShowLogoutModal(true)}
+              >
                 Sair
               </Button>
             </div>
@@ -47,6 +53,19 @@ export default function Header({
           )}
         </div>
       </div>
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={() => {
+          setShowLogoutModal(false);
+          onLogout && onLogout();
+        }}
+        title="Sair do sistema"
+        message="Tem certeza que deseja sair da sua conta?"
+        confirmText="Sim, sair"
+        cancelText="Cancelar"
+        variant="warning"
+      />
     </header>
   );
 }

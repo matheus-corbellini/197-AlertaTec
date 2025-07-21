@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Button from "../Button/Button";
 import Input from "../Input/Input";
 import type { ClientFormData } from "../../types/Client";
@@ -15,12 +15,14 @@ interface ClientFormProps {
   onSubmit: (data: ClientFormData) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  client?: ClientFormData | null;
 }
 
 export default function ClientForm({
   onSubmit,
   onCancel,
   isLoading,
+  client,
 }: ClientFormProps) {
   const [formData, setFormData] = useState<ClientFormData>({
     name: "",
@@ -29,6 +31,20 @@ export default function ClientForm({
     address: "",
     company: "",
   });
+
+  useEffect(() => {
+    if (client) {
+      setFormData(client);
+    } else {
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        address: "",
+        company: "",
+      });
+    }
+  }, [client]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

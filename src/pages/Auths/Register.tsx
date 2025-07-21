@@ -6,6 +6,7 @@ import Input from "../../components/Input/Input";
 import Card from "../../components/Card/Card";
 import { useNavigate } from "../../hooks/useNavigate";
 import { useAuthContext } from "../../contexts/AuthContext";
+import { useToast } from "../../contexts/useToast";
 import "./Auth.css";
 
 export default function RegisterPage() {
@@ -19,6 +20,7 @@ export default function RegisterPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { register, error, clearError } = useAuthContext();
+  const { showToast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -38,7 +40,7 @@ export default function RegisterPage() {
 
     // Validar se as senhas coincidem
     if (formData.password !== formData.confirmPassword) {
-      alert("As senhas não coincidem!");
+      showToast("As senhas não coincidem!", "error");
       return;
     }
 

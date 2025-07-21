@@ -5,17 +5,21 @@ import Dashboard from "./components/Dashboard";
 import ContractList from "./components/ContractList";
 import ContractForm from "./components/ContractForm";
 import Sidebar from "./components/Sidebar";
+import ConfirmModal from "../../components/ConfirmModal/ConfirmModal";
 import type { Contract, ContractFormData } from "../../types/Contract";
 import "./Menu.css";
 import Button from "../../components/Button/Button";
 import { useNavigate } from "../../hooks/useNavigate";
 import Clients from "./components/Clients";
 import { contractService } from "../../services/contractService";
+import { useToast } from "../../contexts/useToast";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const { showToast } = useToast();
 
   const loadContracts = async () => {
     try {
@@ -24,7 +28,7 @@ export default function Home() {
       setContracts(contractsData);
     } catch (error) {
       console.error("Erro ao carregar contratos:", error);
-      alert("Erro ao carregar contratos");
+      showToast("Erro ao carregar contratos", "error");
     } finally {
       setLoading(false);
     }
@@ -47,10 +51,10 @@ export default function Home() {
       };
       await contractService.createContract(contractData);
       await loadContracts();
-      alert("Contrato criado com sucesso!");
+      showToast("Contrato criado com sucesso!", "success");
     } catch (error) {
       console.error("Erro ao criar contrato:", error);
-      alert("Erro ao criar contrato!");
+      showToast("Erro ao criar contrato!", "error");
     } finally {
       setLoading(false);
     }
@@ -58,11 +62,9 @@ export default function Home() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case "dashboard":
-        return <Dashboard contracts={contracts} />;
       case "contracts":
         return <ContractList contracts={contracts} />;
-      case "new-contract":
+      case "add-contract":
         return <ContractForm onSubmit={addContract} />;
       case "clients":
         return <Clients />;
@@ -72,6 +74,10 @@ export default function Home() {
   };
 
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    navigate("/");
+  };
 
   return (
     <div className="app">
@@ -83,7 +89,7 @@ export default function Home() {
             variant="danger"
             className="logout-button"
             size="medium"
-            onClick={() => navigate("/")}
+            onClick={() => setShowLogoutModal(true)}
           >
             Sair
           </Button>
@@ -109,6 +115,17 @@ export default function Home() {
           )}
         </div>
       </main>
+
+      <ConfirmModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={handleLogout}
+        title="Sair do sistema"
+        message="Tem certeza que deseja sair da sua conta?"
+        confirmText="Sim, sair"
+        cancelText="Cancelar"
+        variant="warning"
+      />
     </div>
   );
 }

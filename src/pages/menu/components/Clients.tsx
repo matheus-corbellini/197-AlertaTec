@@ -3,8 +3,10 @@ import Card from "../../../components/Card/Card";
 import Button from "../../../components/Button/Button";
 import Modal from "../../../components/AddClient/Modal";
 import ClientForm from "../../../components/AddClient/ClientForm";
+import ConfirmModal from "../../../components/ConfirmModal/ConfirmModal";
 import { HiUser, HiMail, HiPhone } from "react-icons/hi";
 import { clientService } from "../../../services/clientServices";
+import { useToast } from "../../../contexts/useToast";
 import type { Client, ClientFormData } from "../../../types/Client";
 import "./Clients.css";
 
@@ -13,8 +15,10 @@ export default function Clients() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [clientToDelete, setClientToDelete] = useState<string | null>(null);
+  const { showToast } = useToast();
 
-  // Carregar clientes ao montar o componente
   useEffect(() => {
     loadClients();
   }, []);
@@ -26,7 +30,7 @@ export default function Clients() {
       setClients(clientsData);
     } catch (error) {
       console.error("Erro ao carregar clientes:", error);
-      alert("Erro ao carregar clientes. Tente novamente.");
+      showToast("Erro ao carregar clientes. Tente novamente.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -38,25 +42,48 @@ export default function Clients() {
       await clientService.createClient(clientData);
       await loadClients(); // Recarregar lista
       setIsModalOpen(false);
-      alert("Cliente adicionado com sucesso!");
+      showToast("Cliente adicionado com sucesso!", "success");
     } catch (error) {
       console.error("Erro ao adicionar cliente:", error);
-      alert("Erro ao adicionar cliente. Tente novamente.");
+      showToast("Erro ao adicionar cliente. Tente novamente.", "error");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDeleteClient = async (clientId: string) => {
-    if (!confirm("Tem certeza que deseja remover este cliente?")) return;
+    setClientToDelete(clientId);
+  };
+
+  const confirmDeleteClient = async () => {
+    if (!clientToDelete) return;
 
     try {
-      await clientService.deleteClient(clientId);
-      await loadClients(); // Recarregar lista
-      alert("Cliente removido com sucesso!");
+      await clientService.deleteClient(clientToDelete);
+      await loadClients();
+      showToast("Cliente removido com sucesso!", "success");
     } catch (error) {
       console.error("Erro ao remover cliente:", error);
-      alert("Erro ao remover cliente. Tente novamente.");
+      showToast("Erro ao remover cliente. Tente novamente.", "error");
+    } finally {
+      setClientToDelete(null);
+    }
+  };
+
+  const handleEditClient = async (clientData: ClientFormData) => {
+    if (!editingClient || !editingClient.id) return;
+    setIsSubmitting(true);
+    try {
+      await clientService.updateClient(editingClient.id, clientData);
+      await loadClients();
+      setIsModalOpen(false);
+      setEditingClient(null);
+      showToast("Cliente editado com sucesso!", "success");
+    } catch (error) {
+      console.error("Erro ao editar cliente:", error);
+      showToast("Erro ao editar cliente. Tente novamente.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -64,7 +91,13 @@ export default function Clients() {
     <div className="clients-page">
       <div className="clients-header">
         <h2>Clientes</h2>
-        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+        <Button
+          variant="primary"
+          onClick={() => {
+            setEditingClient(null);
+            setIsModalOpen(true);
+          }}
+        >
           Novo Cliente
         </Button>
       </div>
@@ -95,7 +128,14 @@ export default function Clients() {
                 </div>
               </div>
               <div className="client-actions">
-                <Button variant="secondary" size="small">
+                <Button
+                  variant="secondary"
+                  size="small"
+                  onClick={() => {
+                    setEditingClient(client);
+                    setIsModalOpen(true);
+                  }}
+                >
                   Editar
                 </Button>
                 <Button
@@ -114,14 +154,26 @@ export default function Clients() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title="Novo Cliente"
+        title={editingClient ? "Editar Cliente" : "Novo Cliente"}
       >
         <ClientForm
-          onSubmit={handleAddClient}
+          onSubmit={editingClient ? handleEditClient : handleAddClient}
           onCancel={() => setIsModalOpen(false)}
           isLoading={isSubmitting}
+          client={editingClient}
         />
       </Modal>
+
+      <ConfirmModal
+        isOpen={!!clientToDelete}
+        onClose={() => setClientToDelete(null)}
+        onConfirm={confirmDeleteClient}
+        title="Remover Cliente"
+        message="Tem certeza que deseja remover este cliente? Esta ação não pode ser desfeita."
+        confirmText="Sim, remover"
+        cancelText="Cancelar"
+        variant="danger"
+      />
     </div>
   );
 }
