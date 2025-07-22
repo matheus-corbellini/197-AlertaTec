@@ -64,12 +64,12 @@ export default function Home() {
     switch (activeTab) {
       case "contracts":
         return <ContractList contracts={contracts} />;
-      case "add-contract":
+      case "new-contract":
         return <ContractForm onSubmit={addContract} />;
       case "clients":
         return <Clients />;
       default:
-        return <Dashboard contracts={contracts} />;
+        return <Dashboard contracts={contracts} setActiveTab={setActiveTab} />;
     }
   };
 
