@@ -13,6 +13,8 @@ import {
   type DocumentData,
   type QuerySnapshot,
   type WhereFilterOp,
+  type Query,
+  type CollectionReference,
 } from "firebase/firestore";
 import { db } from "../lib/firebaseConfig";
 
@@ -43,15 +45,16 @@ export const addDocument = async (
   }
 };
 
-// Buscar documentos de uma coleção
 export const getDocuments = async (
   collectionName: string,
   options?: QueryOptions
 ): Promise<DocumentData[]> => {
   try {
-    let q = collection(db, collectionName);
+    let q: Query<DocumentData> | CollectionReference<DocumentData> = collection(
+      db,
+      collectionName
+    );
 
-    // Aplicar filtros se fornecidos
     if (options?.field && options?.operator && options?.value !== undefined) {
       q = query(q, where(options.field, options.operator, options.value));
     }
