@@ -34,6 +34,7 @@ export interface ContractListProps {
 
 export interface DashboardProps {
   contracts: Contract[];
+  setActiveTab: (tab: string) => void;
 }
 
 export interface SidebarProps {

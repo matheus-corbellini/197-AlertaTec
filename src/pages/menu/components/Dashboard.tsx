@@ -3,7 +3,7 @@ import Card from "../../../components/Card/Card";
 import type { DashboardProps } from "../../../types/Contract";
 import "./Dashboard.css";
 
-export default function Dashboard({ contracts }: DashboardProps) {
+export default function Dashboard({ contracts, setActiveTab }: DashboardProps) {
   const totalValue = contracts.reduce(
     (sum, contract) => sum + contract.value,
     0
@@ -83,19 +83,35 @@ export default function Dashboard({ contracts }: DashboardProps) {
         <Card className="quick-actions">
           <h2>Ações Rápidas</h2>
           <div className="actions-grid">
-            <Button variant="transparent" className="action-btn">
+            <Button
+              variant="transparent"
+              className="action-btn"
+              onClick={() => setActiveTab("new-contract")}
+            >
               <span className="action-icon">📄</span>
               <span>Novo Contrato</span>
             </Button>
-            <Button variant="transparent" className="action-btn">
+            <Button
+              variant="transparent"
+              className="action-btn"
+              onClick={() => setActiveTab("reports")}
+            >
               <span className="action-icon">📊</span>
               <span>Relatórios</span>
             </Button>
-            <Button variant="transparent" className="action-btn">
+            <Button
+              variant="transparent"
+              className="action-btn"
+              onClick={() => setActiveTab("clients")}
+            >
               <span className="action-icon">👥</span>
               <span>Clientes</span>
             </Button>
-            <Button variant="transparent" className="action-btn">
+            <Button
+              variant="transparent"
+              className="action-btn"
+              onClick={() => setActiveTab("settings")}
+            >
               <span className="action-icon">⚙️</span>
               <span>Configurações</span>
             </Button>
