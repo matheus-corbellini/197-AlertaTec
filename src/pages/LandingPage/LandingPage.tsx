@@ -2,6 +2,7 @@
 
 import Header from "../../components/Header/Header";
 import Button from "../../components/Button/Button";
+import { Footer } from "borderless";
 import "./LandingPage.css";
 import { useNavigate } from "../../hooks/useNavigate";
 
@@ -76,6 +77,14 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <Footer
+        theme="light"
+        useGradient={true}
+        gradientColors={["#667eea", "#764ba2"]}
+        gradientDirection="to right"
+        logoVariant="dark"
+      />
     </div>
   );
 }
