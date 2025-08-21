@@ -17,7 +17,28 @@ export default function Clients() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [clientToDelete, setClientToDelete] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<string>("Todos");
   const { showToast } = useToast();
+
+  const filteredClientes = clients.filter((client) => {
+    if (selectedFilter === "Todos") {
+      return true;
+    }
+    return client.status === selectedFilter;
+  });
+
+  const statusOptions = [
+    "Todos",
+    "Novo",
+    "Em negociação",
+    "Ativo",
+    "Cancelado",
+  ];
+
+  const getClientCount = (status: string) => {
+    if (status === "Todos") return clients.length;
+    return clients.filter((client) => client.status === status).length;
+  };
 
   useEffect(() => {
     loadClients();
@@ -102,53 +123,98 @@ export default function Clients() {
         </Button>
       </div>
 
+      <div className="clients-filters-section">
+        <div className="filters-header">
+          <h3>Filtrar por status</h3>
+          <span className="filters-count">
+            {filteredClientes.length} de {clients.length} clientes
+          </span>
+        </div>
+
+        <div className="filters-buttons">
+          {statusOptions.map((status) => (
+            <button
+              key={status}
+              className={`filter-btn ${
+                selectedFilter === status ? "active" : ""
+              }`}
+              onClick={() => setSelectedFilter(status)}
+            >
+              <span className="filter-label">{status}</span>
+              <span className="filter-count">({getClientCount(status)})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {isLoading ? (
         <div className="loading">Carregando clientes...</div>
       ) : clients.length === 0 ? (
         <div className="empty-state">Nenhum cliente encontrado</div>
-      ) : (
-        <div className="clients-list">
-          {clients.map((client) => (
-            <Card key={client.id} className="client-card">
-              <div className="client-info">
-                <div className="client-avatar">
-                  <HiUser />
-                </div>
-                <div>
-                  <div className="client-name">{client.name}</div>
-                  <div className="client-email">
-                    <HiMail /> {client.email}
-                  </div>
-                  <div className="client-phone">
-                    <HiPhone /> {client.phone}
-                  </div>
-                  {client.company && (
-                    <div className="client-company">🏢 {client.company}</div>
-                  )}
-                </div>
-              </div>
-              <div className="client-actions">
-                <Button
-                  variant="secondary"
-                  size="small"
-                  onClick={() => {
-                    setEditingClient(client);
-                    setIsModalOpen(true);
-                  }}
-                >
-                  Editar
-                </Button>
-                <Button
-                  variant="danger"
-                  size="small"
-                  onClick={() => client.id && handleDeleteClient(client.id)}
-                >
-                  Remover
-                </Button>
-              </div>
-            </Card>
-          ))}
+      ) : filteredClientes.length === 0 ? (
+        <div className="empty-filter-state">
+          <div className="empty-filter-icon">🔍</div>
+          <h3>Nenhum cliente encontrado</h3>
+          <p>Não há clientes com o status "{selectedFilter}"</p>
+          <button
+            className="reset-filter-btn"
+            onClick={() => setSelectedFilter("Todos")}
+          >
+            Ver todos os clientes
+          </button>
         </div>
+      ) : (
+        <>
+          <div className="clients-list">
+            {filteredClientes.map((client) => (
+              <Card key={client.id} className="client-card">
+                <div className="client-info">
+                  <div className="client-avatar">
+                    <HiUser />
+                  </div>
+                  <div>
+                    <div className="client-name">{client.name}</div>
+                    <div className="client-email">
+                      <HiMail /> {client.email}
+                    </div>
+                    <div
+                      className="client-status-badge"
+                      data-status={client.status}
+                    >
+                      <div className="client-status-indicator"></div>
+                      {client.status}
+                    </div>
+                    <div className="client-phone">
+                      <HiPhone /> {client.phone}
+                    </div>
+                    {client.company && (
+                      <div className="client-company">🏢 {client.company}</div>
+                    )}
+                  </div>
+                </div>
+                <div className="client-actions">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => {
+                      setEditingClient(client);
+                      setIsModalOpen(true);
+                    }}
+                  >
+                    Editar
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="small"
+                    onClick={() => client.id && handleDeleteClient(client.id)}
+                  >
+                    Remover
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </>
       )}
 
       <Modal

@@ -30,6 +30,7 @@ export default function ClientForm({
     phone: "",
     address: "",
     company: "",
+    status: "",
   });
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function ClientForm({
         phone: "",
         address: "",
         company: "",
+        status: "",
       });
     }
   }, [client]);
@@ -53,13 +55,14 @@ export default function ClientForm({
 
   const handleChange =
     (field: keyof ClientFormData) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setFormData((prev) => ({ ...prev, [field]: e.target.value }));
     };
   return (
     <form onSubmit={handleSubmit} className="client-form">
       <Input
         label="Nome *"
+        placeholder="Nome do cliente"
         value={formData.name}
         onChange={handleChange("name")}
         required
@@ -68,15 +71,36 @@ export default function ClientForm({
 
       <Input
         label="Email *"
+        placeholder="Email do cliente"
         type="email"
         value={formData.email}
         onChange={handleChange("email")}
         required
         icon={<HiMail />}
       />
+      <div className="client-status-container">
+        <label className="form-label" htmlFor="status">
+          Status
+        </label>
+        <select
+          id="status"
+          className="form-select"
+          onChange={handleChange("status")}
+          value={formData.status}
+        >
+          <option value="" disabled selected hidden>
+            Selecione o status
+          </option>
+          <option value="Novo">Novo</option>
+          <option value="Em negociação">Em negociação</option>
+          <option value="Ativo">Ativo</option>
+          <option value="Cancelado">Cancelado</option>
+        </select>
+      </div>
 
       <Input
         label="Telefone *"
+        placeholder="(55) 99999-9999"
         value={formData.phone}
         onChange={handleChange("phone")}
         required
@@ -85,6 +109,7 @@ export default function ClientForm({
 
       <Input
         label="Endereço"
+        placeholder="Endereço do cliente  "
         value={formData.address || ""}
         onChange={handleChange("address")}
         icon={<HiHome />}
@@ -92,6 +117,7 @@ export default function ClientForm({
 
       <Input
         label="Empresa"
+        placeholder="Empresa do cliente"
         value={formData.company || ""}
         onChange={handleChange("company")}
         icon={<HiOfficeBuilding />}

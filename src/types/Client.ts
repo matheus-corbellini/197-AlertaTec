@@ -6,6 +6,7 @@ export interface Client {
   company: string;
   createdAt?: string;
   updatedAt?: string;
+  status: string;
 }
 
 export interface ClientFormData {
@@ -14,4 +15,5 @@ export interface ClientFormData {
   phone: string;
   address?: string;
   company?: string;
+  status: string;
 }
