@@ -17,6 +17,8 @@ interface InputProps {
   icon?: React.ReactNode;
   showPasswordToggle?: boolean;
   label?: string;
+  min?: string;
+  step?: string;
 }
 
 export default function Input({
@@ -31,6 +33,8 @@ export default function Input({
   icon,
   showPasswordToggle = false,
   label,
+  min,
+  step,
 }: InputProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -62,6 +66,8 @@ export default function Input({
           className={`input ${icon ? "with-icon" : ""} ${
             showPasswordToggle ? "with-toggle" : ""
           }`}
+          min={min}
+          step={step}
         />
 
         {showPasswordToggle && (

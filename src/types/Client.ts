@@ -7,6 +7,7 @@ export interface Client {
   createdAt?: string;
   updatedAt?: string;
   status: string;
+  monthlyConsumption?: number;
 }
 
 export interface ClientFormData {

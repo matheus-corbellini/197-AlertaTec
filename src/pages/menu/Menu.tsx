@@ -13,6 +13,7 @@ import { useNavigate } from "../../hooks/useNavigate";
 import Clients from "./components/Clients";
 import { contractService } from "../../services/contractService";
 import { useToast } from "../../contexts/useToast";
+import QuickProposal from "./components/QuickProposal";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -68,6 +69,8 @@ export default function Home() {
         return <ContractForm onSubmit={addContract} />;
       case "clients":
         return <Clients />;
+      case "quick-proposal":
+        return <QuickProposal />;
       default:
         return <Dashboard contracts={contracts} setActiveTab={setActiveTab} />;
     }

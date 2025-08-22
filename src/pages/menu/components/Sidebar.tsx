@@ -10,6 +10,7 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
     { id: "contracts", label: "Contratos", icon: "📄" },
     { id: "new-contract", label: "Novo Contrato", icon: "➕" },
     { id: "clients", label: "Clientes", icon: "👥" },
+    { id: "quick-proposal", label: "Propostas Rápidas", icon: "🚀" },
     { id: "reports", label: "Relatórios", icon: "📈" },
     { id: "settings", label: "Configurações", icon: "⚙️" },
   ];
