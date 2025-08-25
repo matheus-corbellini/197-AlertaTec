@@ -14,6 +14,7 @@ import Clients from "./components/Clients";
 import { contractService } from "../../services/contractService";
 import { useToast } from "../../contexts/useToast";
 import QuickProposal from "./components/QuickProposal";
+import ComissionPanel from "./components/ComissionPanel";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -71,6 +72,8 @@ export default function Home() {
         return <Clients />;
       case "quick-proposal":
         return <QuickProposal />;
+      case "comission":
+        return <ComissionPanel contracts={contracts} />;
       default:
         return <Dashboard contracts={contracts} setActiveTab={setActiveTab} />;
     }

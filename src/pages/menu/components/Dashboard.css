@@ -16,6 +16,8 @@
   gap: 1rem;
   border-left: 4px solid #667eea;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: white; /* Garante fundo branco */
+  position: relative; /* Para posicionamento correto dos elementos */
 }
 
 .stat-card:hover {
@@ -41,7 +43,60 @@
 
 .stat-icon {
   font-size: 2.5rem;
-  opacity: 0.8;
+  opacity: 1; /* Aumentei a opacidade para garantir visibilidade */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.5rem; /* Garante que o ícone tenha espaço mínimo */
+  min-height: 2.5rem;
+}
+
+.stat-icon svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: block; /* Garante que o SVG seja exibido como bloco */
+  flex-shrink: 0; /* Impede que o ícone encolha */
+}
+
+/* Cores específicas para cada ícone */
+.stat-card:nth-child(1) .stat-icon {
+  color: #10b981 !important; /* Verde para Valor Total */
+}
+
+.stat-card:nth-child(2) .stat-icon {
+  color: #f59e0b !important; /* Laranja para Comissões */
+}
+
+.stat-card:nth-child(3) .stat-icon {
+  color: #3b82f6 !important; /* Azul para Contratos Ativos */
+}
+
+.stat-card:nth-child(4) .stat-icon {
+  color: #ef4444 !important; /* Vermelho para Pendentes */
+}
+
+/* Debug: Garantir que todos os ícones sejam visíveis */
+.stat-icon,
+.action-icon {
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* Garantir que os SVGs dos ícones sejam sempre visíveis */
+.stat-icon svg,
+.action-icon svg {
+  visibility: visible !important;
+  opacity: 1 !important;
+  fill: currentColor !important; /* Garante que o SVG use a cor atual */
+  color: inherit !important; /* Herda a cor do elemento pai */
+}
+
+/* Debug adicional: Forçar visibilidade de todos os ícones */
+.dashboard .stat-icon,
+.dashboard .action-icon {
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }
 
 .stat-content h3 {
@@ -176,6 +231,7 @@
   text-align: center;
   justify-content: center;
   min-height: 100px;
+  position: relative; /* Para posicionamento correto */
 }
 
 .action-btn:hover {
@@ -185,8 +241,44 @@
   transform: translateY(-2px);
 }
 
+.action-btn:hover .action-icon {
+  color: #667eea !important;
+}
+
 .action-icon {
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.action-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  display: block; /* Garante que o SVG seja exibido como bloco */
+  flex-shrink: 0; /* Impede que o ícone encolha */
+}
+
+/* Cores específicas para cada ícone de ação */
+.action-btn:nth-child(1) .action-icon {
+  color: #3b82f6 !important; /* Azul para Novo Contrato */
+}
+
+.action-btn:nth-child(2) .action-icon {
+  color: #10b981 !important; /* Verde para Comissões */
+}
+
+.action-btn:nth-child(3) .action-icon {
+  color: #f59e0b !important; /* Laranja para Relatórios */
+}
+
+.action-btn:nth-child(4) .action-icon {
+  color: #8b5cf6 !important; /* Roxo para Clientes */
+}
+
+.action-btn:nth-child(5) .action-icon {
+  color: #6b7280 !important; /* Cinza para Configurações */
 }
 
 .action-btn span:last-child {

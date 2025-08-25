@@ -12,6 +12,7 @@ import {
   HiTrash,
   HiMail,
 } from "react-icons/hi";
+import { MdBarChart } from "react-icons/md";
 import "./ProposalViewModal.css";
 
 interface ProposalViewModalProps {
@@ -231,7 +232,7 @@ export default function ProposalViewModal({
 
         {/* Economia Projetada */}
         <div className="proposal-section">
-          <h4>📈 Projeção de Economia</h4>
+          <h4><MdBarChart /> Projeção de Economia</h4>
           <div className="projection-grid">
             <div className="projection-item">
               <span className="period">1 Ano</span>

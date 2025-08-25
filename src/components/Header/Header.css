@@ -31,6 +31,14 @@
 
 .logo-icon {
   font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .auth-buttons {

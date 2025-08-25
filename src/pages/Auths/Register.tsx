@@ -53,7 +53,7 @@ export default function RegisterPage() {
         phone: formData.phone,
       });
 
-      console.log("🚀 Registration completed, navigating to dashboard...");
+      console.log("Registration completed, navigating to dashboard...");
       setTimeout(() => {
         navigate("dashboard");
         setIsSubmitting(false);

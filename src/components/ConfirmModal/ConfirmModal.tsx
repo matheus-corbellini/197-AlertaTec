@@ -1,3 +1,4 @@
+import { MdWarning, MdInfo } from "react-icons/md";
 import Button from "../Button/Button";
 import "./ConfirmModal.css";
 
@@ -34,9 +35,8 @@ export default function ConfirmModal({
       <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
         <div className="confirm-modal-header">
           <div className={`confirm-modal-icon ${variant}`}>
-            {variant === "danger" && "⚠️"}
-            {variant === "warning" && "⚠️"}
-            {variant === "info" && "ℹ️"}
+            {(variant === "danger" || variant === "warning") && <MdWarning />}
+            {variant === "info" && <MdInfo />}
           </div>
           <h3 className="confirm-modal-title">{title}</h3>
         </div>

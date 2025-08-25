@@ -50,6 +50,14 @@
 .confirm-modal-icon {
   font-size: 3rem;
   margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confirm-modal-icon svg {
+  width: 3rem;
+  height: 3rem;
 }
 
 .confirm-modal-icon.danger {

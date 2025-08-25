@@ -89,6 +89,14 @@
 .feature-icon {
   font-size: 3rem;
   margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.feature-icon svg {
+  width: 3rem;
+  height: 3rem;
 }
 
 .feature-card h3 {

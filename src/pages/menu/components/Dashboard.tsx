@@ -1,3 +1,13 @@
+import {
+  MdAttachMoney,
+  MdPayments,
+  MdCheckCircle,
+  MdSchedule,
+  MdDescription,
+  MdBarChart,
+  MdPeople,
+  MdSettings,
+} from "react-icons/md";
 import Button from "../../../components/Button/Button";
 import Card from "../../../components/Card/Card";
 import type { DashboardProps } from "../../../types/Contract";
@@ -23,7 +33,9 @@ export default function Dashboard({ contracts, setActiveTab }: DashboardProps) {
     <div className="dashboard">
       <div className="stats-grid">
         <Card className="stat-card">
-          <div className="stat-icon">💰</div>
+          <div className="stat-icon">
+            <MdAttachMoney />
+          </div>
           <div className="stat-content">
             <h3>Valor Total</h3>
             <p className="stat-value">R$ {totalValue.toLocaleString()}</p>
@@ -31,7 +43,9 @@ export default function Dashboard({ contracts, setActiveTab }: DashboardProps) {
         </Card>
 
         <Card className="stat-card">
-          <div className="stat-icon">💵</div>
+          <div className="stat-icon">
+            <MdPayments />
+          </div>
           <div className="stat-content">
             <h3>Comissões</h3>
             <p className="stat-value">R$ {totalCommission.toLocaleString()}</p>
@@ -39,7 +53,9 @@ export default function Dashboard({ contracts, setActiveTab }: DashboardProps) {
         </Card>
 
         <Card className="stat-card">
-          <div className="stat-icon">✅</div>
+          <div className="stat-icon">
+            <MdCheckCircle />
+          </div>
           <div className="stat-content">
             <h3>Contratos Ativos</h3>
             <p className="stat-value">{activeContracts}</p>
@@ -47,7 +63,9 @@ export default function Dashboard({ contracts, setActiveTab }: DashboardProps) {
         </Card>
 
         <Card className="stat-card">
-          <div className="stat-icon">⏳</div>
+          <div className="stat-icon">
+            <MdSchedule />
+          </div>
           <div className="stat-content">
             <h3>Pendentes</h3>
             <p className="stat-value">{pendingContracts}</p>
@@ -88,15 +106,29 @@ export default function Dashboard({ contracts, setActiveTab }: DashboardProps) {
               className="action-btn"
               onClick={() => setActiveTab("new-contract")}
             >
-              <span className="action-icon">📄</span>
+              <span className="action-icon">
+                <MdDescription />
+              </span>
               <span>Novo Contrato</span>
+            </Button>
+            <Button
+              variant="transparent"
+              className="action-btn"
+              onClick={() => setActiveTab("comission")}
+            >
+              <span className="action-icon">
+                <MdAttachMoney />
+              </span>
+              <span>Comissões</span>
             </Button>
             <Button
               variant="transparent"
               className="action-btn"
               onClick={() => setActiveTab("reports")}
             >
-              <span className="action-icon">📊</span>
+              <span className="action-icon">
+                <MdBarChart />
+              </span>
               <span>Relatórios</span>
             </Button>
             <Button
@@ -104,7 +136,9 @@ export default function Dashboard({ contracts, setActiveTab }: DashboardProps) {
               className="action-btn"
               onClick={() => setActiveTab("clients")}
             >
-              <span className="action-icon">👥</span>
+              <span className="action-icon">
+                <MdPeople />
+              </span>
               <span>Clientes</span>
             </Button>
             <Button
@@ -112,7 +146,9 @@ export default function Dashboard({ contracts, setActiveTab }: DashboardProps) {
               className="action-btn"
               onClick={() => setActiveTab("settings")}
             >
-              <span className="action-icon">⚙️</span>
+              <span className="action-icon">
+                <MdSettings />
+              </span>
               <span>Configurações</span>
             </Button>
           </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { MdRocketLaunch } from "react-icons/md";
 import Button from "../Button/Button";
 import "./Header.css";
 import { useNavigate } from "../../hooks/useNavigate";
@@ -24,7 +25,7 @@ export default function Header({
     <header className="header">
       <div className="header-container">
         <div className="logo" onClick={() => navigate("landing")}>
-          <span className="logo-icon">🚀</span>
+          <span className="logo-icon"><MdRocketLaunch /></span>
           <span className="logo-text-header">AlertaTec</span>
         </div>
 
