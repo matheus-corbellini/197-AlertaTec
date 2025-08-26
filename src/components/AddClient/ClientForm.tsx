@@ -8,6 +8,7 @@ import {
   HiPhone,
   HiHome,
   HiOfficeBuilding,
+  HiLightningBolt,
 } from "react-icons/hi";
 import "./ClientForm.css";
 
@@ -31,6 +32,7 @@ export default function ClientForm({
     address: "",
     company: "",
     status: "",
+    monthlyConsumption: undefined,
   });
 
   useEffect(() => {
@@ -44,6 +46,7 @@ export default function ClientForm({
         address: "",
         company: "",
         status: "",
+        monthlyConsumption: undefined,
       });
     }
   }, [client]);
@@ -56,7 +59,13 @@ export default function ClientForm({
   const handleChange =
     (field: keyof ClientFormData) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setFormData((prev) => ({ ...prev, [field]: e.target.value }));
+      const value =
+        field === "monthlyConsumption"
+          ? e.target.value
+            ? Number(e.target.value)
+            : undefined
+          : e.target.value;
+      setFormData((prev) => ({ ...prev, [field]: value }));
     };
   return (
     <form onSubmit={handleSubmit} className="client-form">
@@ -121,6 +130,15 @@ export default function ClientForm({
         value={formData.company || ""}
         onChange={handleChange("company")}
         icon={<HiOfficeBuilding />}
+      />
+
+      <Input
+        label="Consumo Mensal (kWh)"
+        placeholder="Ex: 350"
+        type="number"
+        value={formData.monthlyConsumption?.toString() || ""}
+        onChange={handleChange("monthlyConsumption")}
+        icon={<HiLightningBolt />}
       />
 
       <div className="form-actions">

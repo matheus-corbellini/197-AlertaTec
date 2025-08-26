@@ -1,23 +1,27 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   HiUser,
   HiMail,
   HiPhone,
   HiCurrencyDollar,
   HiDocumentText,
+  HiUserAdd,
 } from "react-icons/hi";
 import Button from "../../../components/Button/Button";
 import Input from "../../../components/Input/Input";
 import Card from "../../../components/Card/Card";
 import type { ContractFormProps } from "../../../types/Contract";
+import type { Client } from "../../../types/Client";
+import { clientService } from "../../../services/clientServices";
 import "./ContractForm.css";
 import { useToast } from "../../../contexts/useToast";
 
 export default function ContractForm({ onSubmit }: ContractFormProps) {
   const [formData, setFormData] = useState({
+    clientId: "",
     clientName: "",
     clientEmail: "",
     clientPhone: "",
@@ -28,12 +32,33 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
     duration: "",
   });
 
+  const [clients, setClients] = useState<Client[]>([]);
+  const [clientMode, setClientMode] = useState<"existing" | "new">("existing");
+  const [isLoadingClients, setIsLoadingClients] = useState(false);
+
   const { showToast } = useToast();
+
+  useEffect(() => {
+    loadClients();
+  }, []);
+
+  const loadClients = async () => {
+    setIsLoadingClients(true);
+    try {
+      const clientsData = await clientService.getClients();
+      setClients(clientsData);
+    } catch (error) {
+      console.error("Erro ao carregar clientes:", error);
+    } finally {
+      setIsLoadingClients(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
     setFormData({
+      clientId: "",
       clientName: "",
       clientEmail: "",
       clientPhone: "",
@@ -57,6 +82,43 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
     });
   };
 
+  const handleClientSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const clientId = e.target.value;
+    if (clientId) {
+      const selectedClient = clients.find((client) => client.id === clientId);
+      if (selectedClient) {
+        setFormData({
+          ...formData,
+          clientId: selectedClient.id || "",
+          clientName: selectedClient.name,
+          clientEmail: selectedClient.email,
+          clientPhone: selectedClient.phone,
+        });
+      }
+    } else {
+      setFormData({
+        ...formData,
+        clientId: "",
+        clientName: "",
+        clientEmail: "",
+        clientPhone: "",
+      });
+    }
+  };
+
+  const handleClientModeChange = (mode: "existing" | "new") => {
+    setClientMode(mode);
+    if (mode === "new") {
+      setFormData({
+        ...formData,
+        clientId: "",
+        clientName: "",
+        clientEmail: "",
+        clientPhone: "",
+      });
+    }
+  };
+
   return (
     <Card className="contract-form">
       <h2>Novo Contrato</h2>
@@ -64,44 +126,116 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
         <div className="form-sections">
           <Card className="form-section">
             <h3>Informações do Cliente</h3>
+
+            {/* Seletor de modo do cliente */}
             <div className="form-group">
-              <label htmlFor="clientName">Nome do Cliente</label>
-              <Input
-                type="text"
-                name="clientName"
-                placeholder="Digite o nome do cliente"
-                value={formData.clientName}
-                onChange={handleChange}
-                required
-                icon={<HiUser />}
-              />
+              <label>Tipo de Cliente</label>
+              <div className="client-mode-buttons">
+                <button
+                  type="button"
+                  className={`mode-btn ${
+                    clientMode === "existing" ? "active" : ""
+                  }`}
+                  onClick={() => handleClientModeChange("existing")}
+                >
+                  <HiUser />
+                  Cliente Existente
+                </button>
+                <button
+                  type="button"
+                  className={`mode-btn ${clientMode === "new" ? "active" : ""}`}
+                  onClick={() => handleClientModeChange("new")}
+                >
+                  <HiUserAdd />
+                  Novo Cliente
+                </button>
+              </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="clientEmail">Email</label>
-              <Input
-                type="email"
-                name="clientEmail"
-                placeholder="Digite o email do cliente"
-                value={formData.clientEmail}
-                onChange={handleChange}
-                required
-                icon={<HiMail />}
-              />
-            </div>
+            {clientMode === "existing" ? (
+              <div className="form-group">
+                <label htmlFor="clientSelect">Selecionar Cliente</label>
+                <select
+                  id="clientSelect"
+                  onChange={handleClientSelect}
+                  value={formData.clientId}
+                  className="form-select"
+                  disabled={isLoadingClients}
+                  required
+                >
+                  <option value="">
+                    {isLoadingClients
+                      ? "Carregando clientes..."
+                      : "Selecione um cliente"}
+                  </option>
+                  {clients.map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name} - {client.email}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <>
+                <div className="form-group">
+                  <label htmlFor="clientName">Nome do Cliente</label>
+                  <Input
+                    type="text"
+                    name="clientName"
+                    placeholder="Digite o nome do cliente"
+                    value={formData.clientName}
+                    onChange={handleChange}
+                    required
+                    icon={<HiUser />}
+                  />
+                </div>
 
-            <div className="form-group">
-              <label htmlFor="clientPhone">Telefone</label>
-              <Input
-                type="tel"
-                name="clientPhone"
-                placeholder="Digite o telefone do cliente"
-                value={formData.clientPhone}
-                onChange={handleChange}
-                required
-                icon={<HiPhone />}
-              />
-            </div>
+                <div className="form-group">
+                  <label htmlFor="clientEmail">Email</label>
+                  <Input
+                    type="email"
+                    name="clientEmail"
+                    placeholder="Digite o email do cliente"
+                    value={formData.clientEmail}
+                    onChange={handleChange}
+                    required
+                    icon={<HiMail />}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="clientPhone">Telefone</label>
+                  <Input
+                    type="tel"
+                    name="clientPhone"
+                    placeholder="Digite o telefone do cliente"
+                    value={formData.clientPhone}
+                    onChange={handleChange}
+                    required
+                    icon={<HiPhone />}
+                  />
+                </div>
+              </>
+            )}
+
+            {/* Informações do cliente selecionado (somente leitura) */}
+            {clientMode === "existing" && formData.clientId && (
+              <div className="selected-client-info">
+                <h4>Cliente Selecionado:</h4>
+                <div className="client-details">
+                  <p>
+                    <HiUser /> <strong>Nome:</strong> {formData.clientName}
+                  </p>
+                  <p>
+                    <HiMail /> <strong>Email:</strong> {formData.clientEmail}
+                  </p>
+                  <p>
+                    <HiPhone /> <strong>Telefone:</strong>{" "}
+                    {formData.clientPhone}
+                  </p>
+                </div>
+              </div>
+            )}
           </Card>
 
           <Card className="form-section">

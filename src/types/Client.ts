@@ -10,6 +10,14 @@ export interface Client {
   monthlyConsumption?: number;
 }
 
+export interface ClientConsumptionData {
+  month: string;
+  year: number;
+  consumption: number;
+  contractId?: string;
+  contractStatus?: string;
+}
+
 export interface ClientFormData {
   name: string;
   email: string;
@@ -17,4 +25,5 @@ export interface ClientFormData {
   address?: string;
   company?: string;
   status: string;
+  monthlyConsumption?: number;
 }

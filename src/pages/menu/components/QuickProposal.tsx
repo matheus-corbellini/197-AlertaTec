@@ -13,6 +13,8 @@ import {
   calculateMonthlySavings,
   calculatePaybackPeriod,
 } from "../../../utils/solarCalculation";
+import { clientService } from "../../../services/clientServices";
+import { useClientContext } from "../../../contexts/ClientContext";
 import "./QuickProposal.css";
 
 export default function QuickProposal() {
@@ -97,8 +99,30 @@ export default function QuickProposal() {
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedProposal, setSelectedProposal] =
     useState<QuickProposal | null>(null);
+
+  // Função para atualizar o consumo mensal do cliente
+  const updateClientConsumption = async (
+    clientId: string,
+    monthlyConsumption: number
+  ) => {
+    try {
+      console.log("Atualizando consumo do cliente:", {
+        clientId,
+        monthlyConsumption,
+      });
+      await clientService.updateClient(clientId, { monthlyConsumption });
+      console.log("Consumo do cliente atualizado com sucesso!");
+
+      // Triggar refresh dos clientes em outros componentes
+      triggerClientRefresh();
+    } catch (error) {
+      console.error("Erro ao atualizar consumo do cliente:", error);
+      throw error;
+    }
+  };
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { triggerClientRefresh } = useClientContext();
 
   useEffect(() => {
     loadProposals();
@@ -154,6 +178,15 @@ export default function QuickProposal() {
         createdAt: new Date().toISOString().split("T")[0],
         status: "draft",
       };
+
+      // Atualizar o monthlyConsumption do cliente
+      if (data.clientId && data.monthlyConsumption > 0) {
+        try {
+          await updateClientConsumption(data.clientId, data.monthlyConsumption);
+        } catch (error) {
+          console.error("Erro ao atualizar consumo do cliente:", error);
+        }
+      }
 
       setProposals((prev) => [newProposal, ...prev]);
       setIsModalOpen(false);

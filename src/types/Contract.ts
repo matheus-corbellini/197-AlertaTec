@@ -1,5 +1,6 @@
 export interface Contract {
   id?: string;
+  clientId?: string; // ID do cliente vinculado (opcional para contratos antigos)
   clientName: string;
   clientEmail: string;
   clientPhone: string;
@@ -14,6 +15,7 @@ export interface Contract {
 }
 
 export interface ContractFormData {
+  clientId?: string; // ID do cliente selecionado (opcional)
   clientName: string;
   clientEmail: string;
   clientPhone: string;
@@ -30,6 +32,8 @@ export interface ContractFormProps {
 
 export interface ContractListProps {
   contracts: Contract[];
+  onEditContract?: (contract: Contract) => void;
+  onDeleteContract?: (contractId: string) => void;
 }
 
 export interface DashboardProps {

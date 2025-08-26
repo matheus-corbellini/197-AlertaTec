@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { HiSearch } from "react-icons/hi";
+import { HiSearch, HiPencil, HiTrash } from "react-icons/hi";
 import Button from "../../../components/Button/Button";
 import Input from "../../../components/Input/Input";
 import Card from "../../../components/Card/Card";
 import type { Contract, ContractListProps } from "../../../types/Contract";
 import "./ContractList.css";
 
-export default function ContractList({ contracts }: ContractListProps) {
+export default function ContractList({
+  contracts,
+  onEditContract,
+  onDeleteContract,
+}: ContractListProps) {
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -96,14 +100,40 @@ Este contrato foi gerado automaticamente pelo sistema.
               {new Date(contract.date).toLocaleDateString("pt-BR")}
             </div>
             <div className="col">R$ {contract.commission.toLocaleString()}</div>
-            <div className="col">
-              <Button
-                onClick={() => generateContract(contract)}
-                variant="primary"
-                size="small"
-              >
-                Gerar Contrato
-              </Button>
+            <div className="col actions-col">
+              <div className="action-buttons">
+                <Button
+                  onClick={() => generateContract(contract)}
+                  variant="primary"
+                  size="small"
+                >
+                  Gerar Contrato
+                </Button>
+
+                {onEditContract && (
+                  <Button
+                    onClick={() => onEditContract(contract)}
+                    variant="secondary"
+                    size="small"
+                    className="edit-btn"
+                  >
+                    <HiPencil />
+                    Editar
+                  </Button>
+                )}
+
+                {onDeleteContract && (
+                  <Button
+                    onClick={() => onDeleteContract(contract.id || "")}
+                    variant="danger"
+                    size="small"
+                    className="delete-btn"
+                  >
+                    <HiTrash />
+                    Remover
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         ))}

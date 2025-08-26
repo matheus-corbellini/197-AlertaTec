@@ -98,6 +98,60 @@
   display: inline-block;
 }
 
+/* Estilos para a coluna de ações */
+.actions-col {
+  display: flex;
+  justify-content: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.edit-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.edit-btn svg,
+.delete-btn svg {
+  font-size: 0.875rem;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .action-buttons button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .table-header,
+  .table-row {
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1.5fr;
+  }
+
+  .col:nth-child(4), /* Status */
+  .col:nth-child(6) {
+    /* Comissão */
+    display: none;
+  }
+}
+
 .status-ativo {
   background: #d1fae5;
   color: #065f46;
