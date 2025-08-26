@@ -14,87 +14,13 @@ import {
   calculatePaybackPeriod,
 } from "../../../utils/solarCalculation";
 import { clientService } from "../../../services/clientServices";
+import * as quickProposalService from "../../../services/quickProposalService";
 import { useClientContext } from "../../../contexts/ClientContext";
+import { useToast } from "../../../contexts/useToast";
 import "./QuickProposal.css";
 
 export default function QuickProposal() {
-  const [proposals, setProposals] = useState<QuickProposal[]>([
-    {
-      id: "1",
-      clientId: "client1",
-      clientName: "João Silva",
-      systemPower: 3.5,
-      monthlyConsumption: 500,
-      energyTariff: 0.85,
-      costPerKWp: 4000,
-      monthlyGeneration: 324,
-      totalSystemValue: 15000,
-      monthlySavings: 275,
-      paybackPeriod: 54,
-      createdAt: "2024-01-15",
-      status: "draft",
-    },
-    {
-      id: "2",
-      clientId: "client2",
-      clientName: "Maria Santos",
-      systemPower: 5.0,
-      monthlyConsumption: 800,
-      energyTariff: 0.92,
-      costPerKWp: 3800,
-      monthlyGeneration: 463,
-      totalSystemValue: 20500,
-      monthlySavings: 310,
-      paybackPeriod: 66,
-      createdAt: "2024-01-10",
-      status: "sent",
-    },
-    {
-      id: "3",
-      clientId: "client3",
-      clientName: "Carlos Oliveira",
-      systemPower: 2.5,
-      monthlyConsumption: 300,
-      energyTariff: 0.78,
-      costPerKWp: 4200,
-      monthlyGeneration: 231,
-      totalSystemValue: 12000,
-      monthlySavings: 165,
-      paybackPeriod: 72,
-      createdAt: "2024-01-08",
-      status: "accepted",
-    },
-    {
-      id: "4",
-      clientId: "client4",
-      clientName: "Ana Costa",
-      systemPower: 7.0,
-      monthlyConsumption: 1200,
-      energyTariff: 0.95,
-      costPerKWp: 3600,
-      monthlyGeneration: 648,
-      totalSystemValue: 26800,
-      monthlySavings: 525,
-      paybackPeriod: 51,
-      createdAt: "2024-01-05",
-      status: "sent",
-    },
-    {
-      id: "5",
-      clientId: "client5",
-      clientName: "Pedro Lima",
-      systemPower: 4.2,
-      monthlyConsumption: 650,
-      energyTariff: 0.88,
-      costPerKWp: 3900,
-      monthlyGeneration: 389,
-      totalSystemValue: 17880,
-      monthlySavings: 230,
-      paybackPeriod: 77,
-      createdAt: "2024-01-03",
-      status: "rejected",
-    },
-  ]);
+  const [proposals, setProposals] = useState<QuickProposal[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [selectedProposal, setSelectedProposal] =
@@ -123,6 +49,7 @@ export default function QuickProposal() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { triggerClientRefresh } = useClientContext();
+  const { showToast } = useToast();
 
   useEffect(() => {
     loadProposals();
@@ -131,9 +58,11 @@ export default function QuickProposal() {
   const loadProposals = async () => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const proposalsData = await quickProposalService.getQuickProposals();
+      setProposals(proposalsData);
     } catch (error) {
       console.error("Erro ao carregar propostas:", error);
+      showToast("Erro ao carregar propostas. Tente novamente.", "error");
     } finally {
       setIsLoading(false);
     }
@@ -163,10 +92,10 @@ export default function QuickProposal() {
         monthlySavings
       );
 
-      const newProposal: QuickProposal = {
-        id: Date.now().toString(), // ID temporário
+      // Preparar dados da proposta
+      const proposalData = {
         clientId: data.clientId,
-        clientName: "Cliente Selecionado", // Você pode buscar o nome real
+        clientName: data.clientName || "Cliente Selecionado",
         systemPower: data.systemPower,
         monthlyConsumption: data.monthlyConsumption,
         energyTariff: data.energyTariff,
@@ -175,9 +104,17 @@ export default function QuickProposal() {
         totalSystemValue: Math.round(totalSystemValue),
         monthlySavings: Math.round(monthlySavings),
         paybackPeriod: Math.round(paybackPeriod),
-        createdAt: new Date().toISOString().split("T")[0],
         status: "draft",
       };
+
+      // Salvar no banco de dados
+      const newProposalId = await quickProposalService.createQuickProposal(proposalData);
+      
+      // Buscar a proposta criada para obter todos os campos
+      const newProposal = await quickProposalService.getQuickProposal(newProposalId);
+      if (!newProposal) {
+        throw new Error("Erro ao recuperar proposta criada");
+      }
 
       // Atualizar o monthlyConsumption do cliente
       if (data.clientId && data.monthlyConsumption > 0) {
@@ -188,6 +125,7 @@ export default function QuickProposal() {
         }
       }
 
+      // Atualizar estado local
       setProposals((prev) => [newProposal, ...prev]);
       setIsModalOpen(false);
     } catch (error) {
@@ -216,18 +154,34 @@ export default function QuickProposal() {
     console.log("Editar proposta:", proposal);
   };
 
-  const handleDeleteProposal = (proposalId: string) => {
-    setProposals((prev) => prev.filter((p) => p.id !== proposalId));
+  const handleDeleteProposal = async (proposalId: string) => {
+    try {
+      await quickProposalService.deleteQuickProposal(proposalId);
+      setProposals((prev) => prev.filter((p) => p.id !== proposalId));
+      showToast("Proposta removida com sucesso!", "success");
+    } catch (error) {
+      console.error("Erro ao deletar proposta:", error);
+      showToast("Erro ao remover proposta!", "error");
+    }
   };
 
-  const handleSendProposal = (proposal: QuickProposal) => {
-    // Atualizar status para "sent"
-    setProposals((prev) =>
-      prev.map((p) =>
-        p.id === proposal.id ? { ...p, status: "sent" as const } : p
-      )
-    );
-    setIsViewModalOpen(false);
+  const handleSendProposal = async (proposal: QuickProposal) => {
+    try {
+      // Atualizar status para "sent" no banco
+      await quickProposalService.updateQuickProposal(proposal.id!, { status: "sent" });
+      
+      // Atualizar estado local
+      setProposals((prev) =>
+        prev.map((p) =>
+          p.id === proposal.id ? { ...p, status: "sent" as const } : p
+        )
+      );
+      setIsViewModalOpen(false);
+      showToast("Proposta enviada com sucesso!", "success");
+    } catch (error) {
+      console.error("Erro ao enviar proposta:", error);
+      showToast("Erro ao enviar proposta!", "error");
+    }
   };
 
   return (

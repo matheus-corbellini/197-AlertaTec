@@ -19,6 +19,7 @@ export interface QuickProposal {
 
 export interface QuickProposalFormData {
   clientId: string;
+  clientName?: string;
   monthlyConsumption: number;
   systemPower: number;
   energyTariff: number;
