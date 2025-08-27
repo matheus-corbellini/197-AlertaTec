@@ -38,6 +38,12 @@
   align-items: center;
   gap: 8px;
   margin-left: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  padding: 8px 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 340px;
 }
 
 .year-selector-icon {

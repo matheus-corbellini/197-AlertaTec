@@ -15,6 +15,7 @@ import { contractService } from "../../services/contractService";
 import { useToast } from "../../contexts/useToast";
 import QuickProposal from "./components/QuickProposal";
 import ComissionPanel from "./components/ComissionPanel";
+import Reports from "./components/Reports";
 import { ClientProvider } from "../../contexts/ClientContext";
 
 export default function Home() {
@@ -110,6 +111,8 @@ export default function Home() {
         return <QuickProposal />;
       case "comission":
         return <ComissionPanel contracts={contracts} />;
+      case "reports":
+        return <Reports contracts={contracts} />;
       default:
         return <Dashboard contracts={contracts} setActiveTab={setActiveTab} />;
     }
