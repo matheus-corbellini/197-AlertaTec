@@ -30,6 +30,7 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
     description: "",
     paymentTerms: "a vista",
     duration: "",
+    status: "",
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -54,21 +55,57 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    setFormData({
-      clientId: "",
-      clientName: "",
-      clientEmail: "",
-      clientPhone: "",
-      product: "",
-      value: "",
-      description: "",
-      paymentTerms: "a vista",
-      duration: "",
+
+    try {
+      let finalClientId = formData.clientId;
+
+      // Se for um novo cliente, salvar primeiro na coleção de clientes
+      if (clientMode === "new") {
+        finalClientId = await createClient();
+        showToast("Cliente salvo com sucesso!", "success");
+      }
+
+      // Preparar dados finais com o clientId correto
+      const finalFormData = {
+        ...formData,
+        clientId: finalClientId,
+      };
+
+      // Criar o contrato com todos os dados
+      await onSubmit(finalFormData);
+
+      // Limpar formulário
+      setFormData({
+        clientId: "",
+        clientName: "",
+        clientEmail: "",
+        clientPhone: "",
+        product: "",
+        value: "",
+        description: "",
+        paymentTerms: "a vista",
+        duration: "",
+        status: "",
+      });
+
+      showToast("Contrato criado com sucesso!", "success");
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Erro desconhecido";
+      showToast("Erro ao criar contrato: " + errorMessage, "error");
+    }
+  };
+
+  const createClient = async () => {
+    const clientId = await clientService.createClient({
+      name: formData.clientName,
+      email: formData.clientEmail,
+      phone: formData.clientPhone,
+      status: formData.status,
     });
-    showToast("Contrato criado com sucesso!", "success");
+    return clientId;
   };
 
   const handleChange = (
@@ -117,6 +154,22 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
         clientPhone: "",
       });
     }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      clientId: "",
+      clientName: "",
+      clientEmail: "",
+      clientPhone: "",
+      product: "",
+      value: "",
+      description: "",
+      paymentTerms: "a vista",
+      duration: "",
+      status: "",
+    });
+    setClientMode("existing");
   };
 
   return (
@@ -214,6 +267,27 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
                     required
                     icon={<HiPhone />}
                   />
+                </div>
+                <div className="client-status-container">
+                  <label className="form-label" htmlFor="status">
+                    Status
+                  </label>
+                  <select
+                    id="status"
+                    name="status"
+                    className="form-select"
+                    onChange={handleChange}
+                    value={formData.status}
+                    required
+                  >
+                    <option value="" disabled selected hidden>
+                      Selecione o status
+                    </option>
+                    <option value="Novo">Novo</option>
+                    <option value="Em negociação">Em negociação</option>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Cancelado">Cancelado</option>
+                  </select>
                 </div>
               </>
             )}
@@ -313,7 +387,7 @@ export default function ContractForm({ onSubmit }: ContractFormProps) {
           <Button type="submit" variant="primary">
             Criar Contrato
           </Button>
-          <Button type="button" variant="secondary">
+          <Button type="button" variant="secondary" onClick={handleCancel}>
             Cancelar
           </Button>
         </div>
