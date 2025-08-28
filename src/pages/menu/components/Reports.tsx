@@ -76,27 +76,27 @@ export default function Reports({ contracts: propsContracts }: ReportsProps) {
   ];
 
   useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const [contractsData, clientsData] = await Promise.all([
+          propsContracts
+            ? Promise.resolve(propsContracts)
+            : contractService.getContracts(),
+          clientService.getClients(),
+        ]);
+
+        setContracts(contractsData);
+        setClients(clientsData);
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
-    try {
-      const [contractsData, clientsData] = await Promise.all([
-        propsContracts
-          ? Promise.resolve(propsContracts)
-          : contractService.getContracts(),
-        clientService.getClients(),
-      ]);
-
-      setContracts(contractsData);
-      setClients(clientsData);
-    } catch (error) {
-      console.error("Erro ao carregar dados:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [propsContracts]);
 
   const formatCurrency = (value: number): string => {
     return new Intl.NumberFormat("pt-BR", {
@@ -323,6 +323,486 @@ export default function Reports({ contracts: propsContracts }: ReportsProps) {
     );
   };
 
+  const renderCommissionsReport = () => {
+    const calculateMonthlyComissions = (contracts: Contract[]) => {
+      const monthlyData: {
+        [key: string]: {
+          month: string;
+          year: number;
+          total: number;
+          contracts: number;
+        };
+      } = {};
+
+      contracts.forEach((contract) => {
+        const contractDate = new Date(contract.date);
+        const monthKey = `${contractDate.getFullYear()}-${contractDate.getMonth()}`;
+        const monthName = contractDate.toLocaleString("pt-BR", {
+          month: "long",
+        });
+        const year = contractDate.getFullYear();
+        const comission = contract.commission || 0;
+
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = {
+            month: monthName,
+            year: year,
+            total: 0,
+            contracts: 0,
+          };
+        }
+
+        monthlyData[monthKey].total += comission;
+        monthlyData[monthKey].contracts += 1;
+      });
+
+      return Object.values(monthlyData).sort((a, b) => {
+        const aDate = new Date(a.year, getMonthNumber(a.month));
+        const bDate = new Date(b.year, getMonthNumber(b.month));
+        return aDate.getTime() - bDate.getTime();
+      });
+    };
+
+    const getMonthNumber = (month: string): number => {
+      const monthNames = [
+        "janeiro",
+        "fevereiro",
+        "março",
+        "abril",
+        "maio",
+        "junho",
+        "julho",
+        "agosto",
+        "setembro",
+        "outubro",
+        "novembro",
+        "dezembro",
+      ];
+      return monthNames.indexOf(month.toLowerCase());
+    };
+    const filteredContracts = getFilteredContracts();
+
+    const monthlyComissions = calculateMonthlyComissions(filteredContracts);
+
+    // Debug temporário - pode remover depois
+    console.log("Dados do gráfico:", {
+      filteredContracts: filteredContracts.length,
+      monthlyComissions,
+      maxValue:
+        monthlyComissions.length > 0
+          ? Math.max(...monthlyComissions.map((m) => m.total))
+          : 0,
+    });
+
+    const totalCommissions = monthlyComissions.reduce(
+      (sum, month) => sum + month.total,
+      0
+    );
+    const averageMonthly =
+      totalCommissions / Math.max(monthlyComissions.length, 1);
+    const bestMonth = monthlyComissions.reduce(
+      (best, current) => (current.total > best.total ? current : best),
+      { month: "", year: 0, total: 0, contracts: 0 }
+    );
+
+    return (
+      <div className="report-content">
+        <div className="report-summary">
+          <div className="summary-cards">
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdAttachMoney className="summary-icon" />
+                <h3>Total de Comissões</h3>
+              </div>
+              <div className="summary-value">
+                {formatCurrency(totalCommissions)}
+              </div>
+            </Card>
+
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdTrendingUp className="summary-icon" />
+                <h3>Média Mensal</h3>
+              </div>
+              <div className="summary-value">
+                {formatCurrency(averageMonthly)}
+              </div>
+            </Card>
+
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdAttachMoney className="summary-icon" />
+                <h3>Melhor Mês</h3>
+              </div>
+              <div className="summary-value">
+                {bestMonth.total > 0
+                  ? `${bestMonth.month} ${bestMonth.year}`
+                  : "N/A"}
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        <Card className="report-table-card">
+          <div className="table-header">
+            <h3>Detalhes das Comissões</h3>
+            <Button variant="secondary" size="small">
+              <MdFileDownload />
+              Exportar
+            </Button>
+          </div>
+
+          <div className="table-container">
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Produto</th>
+                  <th>Valor Contrato</th>
+                  <th>Comissão</th>
+                  <th>Data</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredContracts
+                  .filter((contract) => contract.commission > 0)
+                  .map((contract) => (
+                    <tr key={contract.id}>
+                      <td>{contract.clientName}</td>
+                      <td>{contract.product}</td>
+                      <td>{formatCurrency(contract.value)}</td>
+                      <td className="commission-cell">
+                        <strong>{formatCurrency(contract.commission)}</strong>
+                      </td>
+                      <td>{formatDate(contract.date)}</td>
+                      <td>
+                        <span
+                          className={`status-badge status-${contract.status.toLowerCase()}`}
+                        >
+                          {contract.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  const getMonthNumber = (month: string): number => {
+    const monthNames = [
+      "janeiro",
+      "fevereiro",
+      "março",
+      "abril",
+      "maio",
+      "junho",
+      "julho",
+      "agosto",
+      "setembro",
+      "outubro",
+      "novembro",
+      "dezembro",
+    ];
+    return monthNames.indexOf(month.toLowerCase());
+  };
+
+  const renderPerformanceReport = () => {
+    const filteredContracts = getFilteredContracts();
+
+    // Calcular métricas de performance
+    const totalContracts = filteredContracts.length;
+    const activeContracts = filteredContracts.filter(
+      (c) => c.status === "Ativo"
+    ).length;
+    const completedContracts = filteredContracts.filter(
+      (c) => c.status === "Concluido"
+    ).length;
+
+    // Taxa de conversão (contratos ativos + concluídos / total)
+    const conversionRate =
+      totalContracts > 0
+        ? ((activeContracts + completedContracts) / totalContracts) * 100
+        : 0;
+
+    // Ticket médio
+    const totalValue = filteredContracts.reduce((sum, c) => sum + c.value, 0);
+    const averageTicket = totalContracts > 0 ? totalValue / totalContracts : 0;
+
+    // Performance por mês
+    const monthlyPerformance = filteredContracts.reduce((acc, contract) => {
+      const contractDate = new Date(contract.date);
+      const monthKey = `${contractDate.getFullYear()}-${contractDate.getMonth()}`;
+      const monthName = contractDate.toLocaleString("pt-BR", { month: "long" });
+      const year = contractDate.getFullYear();
+
+      if (!acc[monthKey]) {
+        acc[monthKey] = {
+          month: monthName,
+          year: year,
+          contracts: 0,
+          value: 0,
+          commission: 0,
+        };
+      }
+
+      acc[monthKey].contracts += 1;
+      acc[monthKey].value += contract.value;
+      acc[monthKey].commission += contract.commission || 0;
+
+      return acc;
+    }, {} as Record<string, { month: string; year: number; contracts: number; value: number; commission: number }>);
+
+    const monthlyData = Object.values(monthlyPerformance).sort((a, b) => {
+      const aDate = new Date(a.year, getMonthNumber(a.month));
+      const bDate = new Date(b.year, getMonthNumber(b.month));
+      return aDate.getTime() - bDate.getTime();
+    });
+
+    // Meta mensal (exemplo: R$ 50.000 por mês)
+    const monthlyGoal = 50000;
+    const currentMonth = monthlyData[monthlyData.length - 1];
+    const goalAchievement = currentMonth
+      ? (currentMonth.value / monthlyGoal) * 100
+      : 0;
+
+    return (
+      <div className="report-content">
+        <div className="report-summary">
+          <div className="summary-cards">
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdTrendingUp className="summary-icon" />
+                <h3>Taxa de Conversão</h3>
+              </div>
+              <div className="summary-value">{conversionRate.toFixed(1)}%</div>
+              <div className="summary-subtitle">
+                {activeContracts + completedContracts} de {totalContracts}{" "}
+                contratos
+              </div>
+            </Card>
+
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdAttachMoney className="summary-icon" />
+                <h3>Ticket Médio</h3>
+              </div>
+              <div className="summary-value">
+                {formatCurrency(averageTicket)}
+              </div>
+              <div className="summary-subtitle">Valor médio por contrato</div>
+            </Card>
+
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdBarChart className="summary-icon" />
+                <h3>Meta Mensal</h3>
+              </div>
+              <div className="summary-value">{goalAchievement.toFixed(1)}%</div>
+              <div className="summary-subtitle">
+                {currentMonth ? formatCurrency(currentMonth.value) : "R$ 0,00"}{" "}
+                / {formatCurrency(monthlyGoal)}
+              </div>
+            </Card>
+          </div>
+        </div>
+
+        {/* Tabela de Performance Detalhada */}
+        <Card className="report-table-card">
+          <div className="table-header">
+            <h3>Análise Detalhada de Performance</h3>
+            <Button variant="secondary" size="small">
+              <MdFileDownload />
+              Exportar
+            </Button>
+          </div>
+
+          <div className="table-container">
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>Mês</th>
+                  <th>Contratos</th>
+                  <th>Valor Total</th>
+                  <th>Comissões</th>
+                  <th>Ticket Médio</th>
+                  <th>% da Meta</th>
+                </tr>
+              </thead>
+              <tbody>
+                {monthlyData.map((monthData, index) => (
+                  <tr key={index}>
+                    <td>
+                      <strong>
+                        {monthData.month} {monthData.year}
+                      </strong>
+                    </td>
+                    <td>{monthData.contracts}</td>
+                    <td>{formatCurrency(monthData.value)}</td>
+                    <td>{formatCurrency(monthData.commission)}</td>
+                    <td>
+                      {formatCurrency(monthData.value / monthData.contracts)}
+                    </td>
+                    <td>
+                      <span
+                        className={`goal-badge ${
+                          (monthData.value / monthlyGoal) * 100 >= 100
+                            ? "goal-achieved"
+                            : "goal-pending"
+                        }`}
+                      >
+                        {((monthData.value / monthlyGoal) * 100).toFixed(1)}%
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
+  const renderConsumptionReport = () => {
+    const filteredContracts = getFilteredContracts();
+
+    // Calcular métricas de consumo
+    const clientsWithConsumption = clients.filter(
+      (client) => client.monthlyConsumption && client.monthlyConsumption > 0
+    );
+    const totalConsumption = clientsWithConsumption.reduce(
+      (sum, client) => sum + (client.monthlyConsumption || 0),
+      0
+    );
+    const averageConsumption =
+      clientsWithConsumption.length > 0
+        ? totalConsumption / clientsWithConsumption.length
+        : 0;
+
+    // Projeção de economia (exemplo: 30% de economia com energia solar)
+    const potentialSavings = totalConsumption * 0.3;
+    const monthlySavings = potentialSavings / 12;
+
+    return (
+      <div className="report-content">
+        <div className="report-summary">
+          <div className="summary-cards">
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdElectricBolt className="summary-icon" />
+                <h3>Total de Consumo</h3>
+              </div>
+              <div className="summary-value">
+                {totalConsumption.toLocaleString()} kWh/mês
+              </div>
+              <div className="summary-subtitle">
+                {clientsWithConsumption.length} clientes com dados
+              </div>
+            </Card>
+
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdTrendingUp className="summary-icon" />
+                <h3>Consumo Médio</h3>
+              </div>
+              <div className="summary-value">
+                {averageConsumption.toLocaleString()} kWh/mês
+              </div>
+              <div className="summary-subtitle">Por cliente ativo</div>
+            </Card>
+
+            <Card className="summary-card">
+              <div className="summary-header">
+                <MdAttachMoney className="summary-icon" />
+                <h3>Economia Potencial</h3>
+              </div>
+              <div className="summary-value">
+                {monthlySavings.toLocaleString()} kWh/mês
+              </div>
+              <div className="summary-subtitle">30% com energia solar</div>
+            </Card>
+          </div>
+        </div>
+
+        {/* Tabela de Consumo Detalhada */}
+        <Card className="report-table-card">
+          <div className="table-header">
+            <h3>Análise Detalhada de Consumo</h3>
+            <Button variant="secondary" size="small">
+              <MdFileDownload />
+              Exportar
+            </Button>
+          </div>
+
+          <div className="table-container">
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Empresa</th>
+                  <th>Consumo Mensal</th>
+                  <th>Status</th>
+                  <th>Último Contrato</th>
+                  <th>Economia Potencial</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clientsWithConsumption.map((client) => {
+                  const clientContracts = filteredContracts.filter(
+                    (c) =>
+                      c.clientId === client.id || c.clientEmail === client.email
+                  );
+                  const lastContract =
+                    clientContracts.length > 0
+                      ? clientContracts.sort(
+                          (a, b) =>
+                            new Date(b.date).getTime() -
+                            new Date(a.date).getTime()
+                        )[0]
+                      : null;
+                  const potentialSavings =
+                    (client.monthlyConsumption || 0) * 0.3;
+
+                  return (
+                    <tr key={client.id}>
+                      <td>
+                        <strong>{client.name}</strong>
+                      </td>
+                      <td>{client.company || "-"}</td>
+                      <td className="consumption-cell">
+                        {client.monthlyConsumption?.toLocaleString()} kWh/mês
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge status-${client.status.toLowerCase()}`}
+                        >
+                          {client.status}
+                        </span>
+                      </td>
+                      <td>
+                        {lastContract ? formatDate(lastContract.date) : "Nunca"}
+                      </td>
+                      <td className="savings-cell">
+                        <strong>
+                          {potentialSavings.toLocaleString()} kWh/mês
+                        </strong>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      </div>
+    );
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case "clients":
@@ -330,23 +810,11 @@ export default function Reports({ contracts: propsContracts }: ReportsProps) {
       case "contracts":
         return renderContractsReport();
       case "commissions":
-        return (
-          <div className="report-placeholder">
-            Relatório de Comissões em desenvolvimento...
-          </div>
-        );
+        return renderCommissionsReport();
       case "performance":
-        return (
-          <div className="report-placeholder">
-            Relatório de Performance em desenvolvimento...
-          </div>
-        );
+        return renderPerformanceReport();
       case "consumption":
-        return (
-          <div className="report-placeholder">
-            Relatório de Consumo em desenvolvimento...
-          </div>
-        );
+        return renderConsumptionReport();
       default:
         return renderClientsReport();
     }
