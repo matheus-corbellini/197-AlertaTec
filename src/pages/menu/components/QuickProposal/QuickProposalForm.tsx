@@ -27,13 +27,26 @@ export default function QuickProposalForm({
   onSubmit,
   onCancel,
   isLoading = false,
+  isEditing = false,
+  initialData,
 }: QuickProposalFormProps) {
-  const [formData, setFormData] = useState<QuickProposalFormData>({
-    clientId: "",
-    monthlyConsumption: 0,
-    systemPower: 0,
-    energyTariff: 0.85, // Valor padrão brasileiro
-    costPerKWp: 4000, // Valor padrão
+  const [formData, setFormData] = useState<QuickProposalFormData>(() => {
+    if (isEditing && initialData) {
+      return {
+        clientId: initialData.clientId || "",
+        monthlyConsumption: initialData.monthlyConsumption || 0,
+        systemPower: initialData.systemPower || 0,
+        energyTariff: initialData.energyTariff || 0.85,
+        costPerKWp: initialData.costPerKWp || 4000,
+      };
+    }
+    return {
+      clientId: "",
+      monthlyConsumption: 0,
+      systemPower: 0,
+      energyTariff: 0.85, // Valor padrão brasileiro
+      costPerKWp: 4000, // Valor padrão
+    };
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -63,6 +76,23 @@ export default function QuickProposalForm({
       setCalculations(null);
     }
   }, [formData]);
+
+  useEffect(() => {
+    if (isEditing && initialData) {
+      setFormData({
+        clientId: initialData.clientId || "",
+        monthlyConsumption: initialData.monthlyConsumption || 0,
+        systemPower: initialData.systemPower || 0,
+        energyTariff: initialData.energyTariff || 0.85,
+        costPerKWp: initialData.costPerKWp || 4000,
+      });
+
+      if (initialData.clientId) {
+        const client = clients.find((c) => c.id === initialData.clientId);
+        setSelectedClient(client || null);
+      }
+    }
+  }, [isEditing, initialData, clients]);
 
   const loadClients = async () => {
     try {
@@ -140,8 +170,26 @@ export default function QuickProposalForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (calculations && selectedClient) {
-      onSubmit(formData);
+    if (calculations) {
+      // Determinar o nome do cliente baseado no modo
+      let clientName = "";
+
+      if (isEditing && initialData) {
+        // Modo edição: usar o nome do cliente da proposta original
+        clientName = initialData.clientName || "";
+      } else if (selectedClient) {
+        // Modo criação: usar o nome do cliente selecionado
+        clientName = selectedClient.name || "";
+      }
+
+      // Só prosseguir se tiver um nome de cliente
+      if (clientName) {
+        const formDataToSubmit = {
+          ...formData,
+          clientName: clientName,
+        };
+        onSubmit(formDataToSubmit);
+      }
     }
   };
 
@@ -335,7 +383,7 @@ export default function QuickProposalForm({
             onClick={onCancel}
             disabled={isLoading}
           >
-            Cancelar
+            {isEditing ? "Cancelar Edição" : "Cancelar"}
           </Button>
 
           <Button
@@ -344,7 +392,7 @@ export default function QuickProposalForm({
             onClick={handleReset}
             disabled={isLoading}
           >
-            Limpar
+            {isEditing ? "Restaurar" : "Limpar"}
           </Button>
 
           <Button
@@ -353,7 +401,7 @@ export default function QuickProposalForm({
             disabled={!isFormValid || !calculations || isLoading}
             loading={isLoading}
           >
-            Salvar Proposta
+            {isEditing ? "Salvar Edição" : "Salvar Proposta"}
           </Button>
         </div>
       </form>

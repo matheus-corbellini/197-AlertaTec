@@ -50,7 +50,9 @@ export interface QuickProposalResponse {
 }
 
 export interface QuickProposalFormProps {
-  onSubmit: (data: QuickProposalFormData) => void;
+  onSubmit: (data: QuickProposalFormData & { clientName: string }) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  isEditing?: boolean;
+  initialData?: QuickProposal;
 }

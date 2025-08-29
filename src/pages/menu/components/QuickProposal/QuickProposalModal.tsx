@@ -7,6 +7,8 @@ interface QuickProposalModalProps {
   onClose: () => void;
   onSubmit: (data: QuickProposalFormData) => void;
   isLoading?: boolean;
+  initialData?: QuickProposalFormData;
+  isEditing?: boolean;
 }
 
 export default function QuickProposalModal({

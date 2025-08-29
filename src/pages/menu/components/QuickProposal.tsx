@@ -108,10 +108,14 @@ export default function QuickProposal() {
       };
 
       // Salvar no banco de dados
-      const newProposalId = await quickProposalService.createQuickProposal(proposalData);
-      
+      const newProposalId = await quickProposalService.createQuickProposal(
+        proposalData
+      );
+
       // Buscar a proposta criada para obter todos os campos
-      const newProposal = await quickProposalService.getQuickProposal(newProposalId);
+      const newProposal = await quickProposalService.getQuickProposal(
+        newProposalId
+      );
       if (!newProposal) {
         throw new Error("Erro ao recuperar proposta criada");
       }
@@ -149,11 +153,6 @@ export default function QuickProposal() {
     setSelectedProposal(null);
   };
 
-  const handleEditProposal = (proposal: QuickProposal) => {
-    // Aqui você pode implementar a edição futuramente
-    console.log("Editar proposta:", proposal);
-  };
-
   const handleDeleteProposal = async (proposalId: string) => {
     try {
       await quickProposalService.deleteQuickProposal(proposalId);
@@ -168,8 +167,10 @@ export default function QuickProposal() {
   const handleSendProposal = async (proposal: QuickProposal) => {
     try {
       // Atualizar status para "sent" no banco
-      await quickProposalService.updateQuickProposal(proposal.id!, { status: "sent" });
-      
+      await quickProposalService.updateQuickProposal(proposal.id!, {
+        status: "sent",
+      });
+
       // Atualizar estado local
       setProposals((prev) =>
         prev.map((p) =>
@@ -257,7 +258,6 @@ export default function QuickProposal() {
         isOpen={isViewModalOpen}
         onClose={handleCloseViewModal}
         proposal={selectedProposal}
-        onEdit={handleEditProposal}
         onDelete={handleDeleteProposal}
         onSend={handleSendProposal}
       />
